@@ -2,12 +2,14 @@ import React from 'react'
 import Input from './Input.js'
 import { IconSearch } from '@tabler/icons-react';
 import GeminiSVG from './GeminiSVG.js'
-import { useState } from 'react';
+import { useState ,useReducer} from 'react';
 
 
 export default function Room() {
 
-    const [isExpanded, setIsExpanded] = useState(false);
+    // const [isExpanded, setIsExpanded] = useState(false);
+
+    const[isExpanded,toggle] = useReducer((isExpanded)=> !isExpanded , false);
   return (
 
 
@@ -35,14 +37,14 @@ export default function Room() {
 
                     <input 
                     type="text" 
-                     className={`mr-2 p-2 rounded-lg bg-sky-950 focus:bg-blue-950 text-white placeholder-gray-400 
+                     className={`mr-2 rounded-lg bg-sky-950 focus:bg-blue-950 text-white placeholder-gray-400 
                         focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 
-                        ${isExpanded ? "w-56" : "w-0"} ${isExpanded?"p-2":"p-0"}`}
+                        ${isExpanded ? "w-56" : "w-0"} ${isExpanded ? "p-2":"p-0"}`}
                     placeholder="Search Chats..."
                     />
 
 
-                    <IconSearch stroke={2} className="text-blue-100 hover:bg-blue-700 rounded-md p-2" size={42} onClick={()=>{setIsExpanded(!isExpanded)}} />
+                    <IconSearch stroke={2} className="text-blue-100 hover:bg-blue-700 rounded-md p-2" size={42} onClick={toggle} />
                 </div>
             </div>
             <div className='fixed bottom-0 w-full sm:w-3/5 z-20 '><Input/></div>
