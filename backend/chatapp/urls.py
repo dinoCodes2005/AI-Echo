@@ -17,8 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path,include
 from . import views
+from rest_framework.routers import DefaultRouter
+from .views import ChatRoomViewSet
+
+router = DefaultRouter()
+router.register(r'chat-rooms', ChatRoomViewSet)
 
 urlpatterns = [
-    path('',views.index,name="index"),
-    path('chatroom/<slug:slug>/',views.chatroom,name="chatroom")
+    path('',include(router.urls))
 ]

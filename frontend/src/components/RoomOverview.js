@@ -13,7 +13,7 @@ export default function RoomOverview(props) {
             </div>
         </div>
        
-        <h2 className='text-blue-200 truncate'>{props.date}</h2>
+        {/* <h2 className='text-blue-200 truncate'>{props.date}</h2> */}
     </div>
   )
 }
