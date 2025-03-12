@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 class ChatRoom(models.Model):
     name = models.CharField(max_length = 100)
     slug = models.SlugField(unique=True)
+    image = models.ImageField(upload_to='room_images/', null=True, blank=True)
     
     def __str__(self):
         return self.name
@@ -15,7 +16,6 @@ class ChatMessage(models.Model):
     room = models.ForeignKey(ChatRoom,on_delete=models.CASCADE)
     message_content = models.TextField()
     date = models.DateTimeField(auto_now=True)
-    
     class Meta:
         ordering = ('date',)
         

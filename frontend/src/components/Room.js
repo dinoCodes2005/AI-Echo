@@ -1,28 +1,38 @@
-import React from 'react'
+
 import Input from './Input.js'
 import { IconSearch } from '@tabler/icons-react';
 import GeminiSVG from './GeminiSVG.js'
-import { useState ,useReducer} from 'react';
+import { useState ,useReducer,useEffect,useRef} from 'react';
+import { useParams , useLocation} from 'react-router-dom';
 
 
 export default function Room() {
 
     // const [isExpanded, setIsExpanded] = useState(false);
+    const location = useLocation();
+    const {slug} = useParams();
+    const {room} = location.state || {};
+    console.log(room)
 
-    const[isExpanded,toggle] = useReducer((isExpanded)=> !isExpanded , false);
+    const [isExpanded,toggle] = useReducer((isExpanded)=> !isExpanded , false);
+
+    // const socket = useRef(null);
+    // useEffect(()=>{
+
+    // },[])
+
   return (
-
-
         <div className="h-screen relative  w-full sm:w-3/5  bg-repeat flex-1 overflow-y-auto " style={{ backgroundImage: "url('/images/background.jpg')" }}>
             
             <div className='sticky top-0 h-16 w-full bg-gray-900 flex justify-between items-center '>
                 <div className='flex items-center my-2'>
                     <a href="">
-                         <img src="/images/image.png" className='rounded-full h-12 mx-3 hover:brightness-125'  alt="" />
+                         <img src={room.image} className='h-12 w-12 rounded-full mx-2 object-cover hover:brightness-125'  alt="" />
                     </a>
+                    
                    
                     <div className='flex flex-col'>
-                        <h2 className='text-white  cursor-pointer ' style={{fontFamily:"Poppins"}}>Rahul</h2>
+                        <h2 className='text-white  cursor-pointer ' style={{fontFamily:"Poppins"}}>{room.name}</h2>
                         <h2 className='text-blue-200 text-sm' style={{fontFamily:"Poppins"}}>Click for Info</h2>
                     </div>
                 </div>

@@ -3,6 +3,7 @@ import Search from './Search.js'
 import RoomOverview from "./RoomOverview.js";
 import { IconEdit } from '@tabler/icons-react';
 import { IconFilter } from '@tabler/icons-react';
+import { Link } from "react-router-dom";
 
 const fetch_rooms_url = "http://127.0.0.1:8000/chatapp/chat-rooms/";
 export default function ChatRooms() {
@@ -35,7 +36,7 @@ export default function ChatRooms() {
         <div className="flex-1 px-3 py-2 gap-2 overflow-auto overflow-y-auto h-full">
 
             {rooms.map((room)=>(
-                <RoomOverview name = {room.name} message = {room.name} key={room.id} />
+              <Link key={room.slug} to = {`/room/${room.slug}`} state={{room}}><RoomOverview name = {room.name} message = {room.name} image = {room.image} /></Link>   
             ))}
         </div>
     

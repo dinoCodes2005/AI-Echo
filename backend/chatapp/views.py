@@ -7,4 +7,5 @@ from rest_framework import viewsets
 
 class ChatRoomViewSet(viewsets.ModelViewSet):
     queryset = ChatRoom.objects.all()
+    
     serializer_class = ChatRoomSerializer
