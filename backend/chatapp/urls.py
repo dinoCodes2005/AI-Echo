@@ -14,15 +14,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from os import name
 from django.contrib import admin
 from django.urls import path,include
+from httpx import request
 from . import views
 from rest_framework.routers import DefaultRouter
-from .views import ChatRoomViewSet
+from .views import ChatMessageViewSet, ChatRoomViewSet
 
 router = DefaultRouter()
 router.register(r'chat-rooms', ChatRoomViewSet)
+router.register(r'api/get-message',ChatMessageViewSet)
 
 urlpatterns = [
-    path('',include(router.urls))
+    path('',include(router.urls)),
+    path('api/create/',views.create_message,name="create_message"),
+    path('api/current-user/',views.current_user,name="current_user"),
 ]

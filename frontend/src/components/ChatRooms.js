@@ -30,7 +30,7 @@ export default function ChatRooms() {
 
   return (
     <>
-      <div className="bg-blue-950 w-2/5 h-screen hidden sm:flex flex-col px-5 border-r border-black">
+      <div className="bg-blue-950 w-2/5  h-screen hidden sm:flex flex-col px-5 border-r border-black">
         <div className="px-3 mt-5 flex justify-between">
           <h2
             className=" text-3xl text-blue-100 "

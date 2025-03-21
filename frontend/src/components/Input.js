@@ -1,25 +1,74 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IconBrandTelegram } from "@tabler/icons-react";
 import { IconMicrophone } from "@tabler/icons-react";
 import { IconTrash } from "@tabler/icons-react";
 import Picker from "emoji-picker-react";
+import axios from "axios";
 
-export default function Input() {
+export default function Input(props) {
   const [micActive, setMicActive] = useState(false);
-
   const [chosenEmoji, setChosenEmoji] = useState(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const [inputValue, setInputValue] = useState([]);
+  const [user, setUser] = useState(null);
+  const [slug, setSlug] = useState("");
+  const formRef = useRef(null);
+  const inputFieldRef = useRef();
+  const user_data = async () => {
+    try {
+      const response = await axios("http://127.0.0.1:8000/current-user/");
+      console.log("user", response.data);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  useEffect(() => {
+    const url = window.location.href;
+    const slug = url.split("/").pop();
+    setSlug(slug);
+  }, []);
+
+  console.log(slug, props.message);
 
   const onEmojiClick = (event, emojiObject) => {
     setChosenEmoji(emojiObject);
     console.log(emojiObject.target);
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!inputValue.trim()) return;
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/chatapp/api/create/",
+        {
+          message: inputValue,
+          room: slug,
+          user: "admin",
+        }
+      );
+
+      const data = await response;
+      if (data.success) {
+        props.parentValue({
+          message: inputValue,
+          date: new Date().toLocaleDateString(),
+          time: new Date().toLocaleTimeString(),
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+
+    setInputValue("");
+  };
+
   return (
     <>
       <Picker
-        className={`origin-bottom-left transition-all duration-100 ${
-          emojiOpen ? "scale-1" : "scale-0"
+        className={`origin-bottom-left absolute transition-all duration-100 ${
+          emojiOpen ? "scale-1 hidden" : "scale-0 inline-block"
         }`}
       />
 
@@ -62,7 +111,7 @@ export default function Input() {
           </svg>
         </button>
         <div class="flex-grow ml-4">
-          <div class="relative w-full">
+          <div class="relative w-full flex items-center justify-center">
             <button
               className={`absolute left-0 p-2 top-0 origin-left transition-all duration-200 flex items-center justify-center h-full w-12 text-red-600 ${
                 micActive ? "scale-1" : "scale-0"
@@ -71,16 +120,28 @@ export default function Input() {
             >
               <IconTrash stroke={2} />
             </button>
-            <input
-              type="text"
-              class={`flex w-full focus:outline-none focus:ring-sky-700 focus:ring-2 bg-sky-950 focus:bg-blue-950 text-white rounded-xl ${
-                micActive ? "pl-10" : "pl-4"
-              } h-10`}
-              placeholder="Type a message"
-            />
+
+            <form action="" className="flex w-full" onSubmit={handleSubmit}>
+              <input
+                type="text"
+                class={`flex w-full focus:outline-none focus:ring-sky-700 focus:ring-2 mr-2 bg-sky-950 focus:bg-blue-950 text-white rounded-xl ${
+                  micActive ? "pl-10" : "pl-4"
+                } h-10`}
+                placeholder="Type a message"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                ref={inputFieldRef}
+              />
+              <button
+                class="flex items-center justify-center bg-blue-500 hover:bg-blue-600 rounded-xl text-white px-4 py-1 flex-shrink-0"
+                onClick={handleSubmit}
+              >
+                <IconBrandTelegram stroke={2} />
+              </button>
+            </form>
 
             <button
-              className={`absolute right-0 p-2 top-0 flex items-center cursor-pointer justify-center h-full w-12 text-gray-400 hover:text-white transition-all duration-200 ${
+              className={` flex items-center cursor-pointer justify-center h-full w-12 text-gray-400 hover:text-white transition-all duration-200 ${
                 micActive
                   ? "bg-blue-700 scale-[1.3] rounded-full text-white"
                   : "bg-transparent rounded-md"
@@ -91,11 +152,7 @@ export default function Input() {
             </button>
           </div>
         </div>
-        <div class="ml-4">
-          <button class="flex items-center justify-center bg-blue-500 hover:bg-blue-600 rounded-xl text-white px-4 py-1 flex-shrink-0">
-            <IconBrandTelegram stroke={2} />
-          </button>
-        </div>
+        <div class="ml-4"></div>
       </div>
     </>
   );

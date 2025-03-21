@@ -15,7 +15,9 @@ class ChatMessage(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     room = models.ForeignKey(ChatRoom,on_delete=models.CASCADE)
     message_content = models.TextField()
-    date = models.DateTimeField(auto_now=True)
+    date = models.DateField(auto_now=True)
+    time = models.TimeField(auto_now=True)
+        
     class Meta:
         ordering = ('date',)
         

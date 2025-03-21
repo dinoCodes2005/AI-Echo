@@ -1,6 +1,7 @@
 import logo from "./logo.svg";
 import "./App.css";
 import Navbar from "./components/Navbar.js";
+
 import ChatRooms from "./components/ChatRooms.js";
 import Room from "./components/Room.js";
 import { useEffect, useState } from "react";
@@ -17,6 +18,7 @@ function App() {
           <Routes>
             <Route path="/" element={<DefaultRoom />} />
             <Route path="/room/:slug" element={<Room />} />
+            <Route path="/create-room/" element={<CreateRoom />} />
           </Routes>
         </div>
       </Router>

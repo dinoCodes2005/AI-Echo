@@ -24,4 +24,6 @@ yarn-error.log*
 
 #backend
 backend/fill.py
-backend/node_modules
+backend/node_modules/
+
+node_modules
