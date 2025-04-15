@@ -4,24 +4,14 @@ import { IconMicrophone } from "@tabler/icons-react";
 import { IconTrash } from "@tabler/icons-react";
 import Picker from "emoji-picker-react";
 import axios from "axios";
+import useCheckAuthentication from "../api/fetchUser";
 
 export default function Input(props) {
   const [micActive, setMicActive] = useState(false);
-  const [chosenEmoji, setChosenEmoji] = useState(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
-  const [inputValue, setInputValue] = useState([]);
-  const [user, setUser] = useState(null);
+  const [message, setMessage] = useState("");
   const [slug, setSlug] = useState("");
-  const formRef = useRef(null);
-  const inputFieldRef = useRef();
-  const user_data = async () => {
-    try {
-      const response = await axios("http://127.0.0.1:8000/current-user/");
-      console.log("user", response.data);
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
+  const { username, isLoggedIn } = useCheckAuthentication();
 
   useEffect(() => {
     const url = window.location.href;
@@ -31,28 +21,27 @@ export default function Input(props) {
 
   console.log(slug, props.message);
 
-  const onEmojiClick = (event, emojiObject) => {
-    setChosenEmoji(emojiObject);
-    console.log(emojiObject.target);
+  const handleChange = (e) => {
+    setMessage(e.target.value);
+    console.log(message);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!inputValue.trim()) return;
+    if (!message.trim()) return;
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/chatapp/api/create/",
         {
-          message: inputValue,
+          message: message,
           room: slug,
-          user: "admin",
+          user: username,
         }
       );
 
-      const data = await response;
-      if (data.success) {
+      if (response.data.success) {
         props.parentValue({
-          message: inputValue,
+          message: message,
           date: new Date().toLocaleDateString(),
           time: new Date().toLocaleTimeString(),
         });
@@ -61,7 +50,7 @@ export default function Input(props) {
       console.error("Error:", error);
     }
 
-    setInputValue("");
+    setMessage("");
   };
 
   return (
@@ -110,7 +99,7 @@ export default function Input(props) {
             ></path>
           </svg>
         </button>
-        <div class="flex-grow ml-4">
+        <div class="flex-grow w-full ml-4">
           <div class="relative w-full flex items-center justify-center">
             <button
               className={`absolute left-0 p-2 top-0 origin-left transition-all duration-200 flex items-center justify-center h-full w-12 text-red-600 ${
@@ -128,9 +117,8 @@ export default function Input(props) {
                   micActive ? "pl-10" : "pl-4"
                 } h-10`}
                 placeholder="Type a message"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                ref={inputFieldRef}
+                value={message}
+                onChange={handleChange}
               />
               <button
                 class="flex items-center justify-center bg-blue-500 hover:bg-blue-600 rounded-xl text-white px-4 py-1 flex-shrink-0"

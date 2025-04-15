@@ -2,15 +2,18 @@ import React, { useState, useEffect } from "react";
 import RoomOverview from "./RoomOverview.js";
 import { IconEdit } from "@tabler/icons-react";
 import { IconFilter } from "@tabler/icons-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { IconHeart } from "@tabler/icons-react";
 import { IconUserCircle } from "@tabler/icons-react";
 import { IconMessage } from "@tabler/icons-react";
 import { IconX } from "@tabler/icons-react";
 import { IconLibraryPlus } from "@tabler/icons-react";
+import { IconLogout2 } from "@tabler/icons-react";
+import axios from "axios";
 
 export default function ChatRooms() {
   const fetch_rooms_url = "http://127.0.0.1:8000/chatapp/chat-rooms/";
+  const navigate = useNavigate();
   //set rooms is for fetching the room objects
   const [rooms, setRooms] = useState([]);
   //set query is for searching
@@ -27,10 +30,34 @@ export default function ChatRooms() {
 
   const [edit, setEdit] = useState(false);
   const [filter, setFilter] = useState(false);
+  const handleLogout = async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+    const accessToken = localStorage.getItem("accessToken");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    };
+    try {
+      if (refreshToken) {
+        const response = await axios.post(
+          "http://127.0.0.1:8000/accounts/logout/",
+          { refresh: refreshToken },
+          config
+        );
+        console.log(response);
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        navigate("/login/");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <>
-      <div className="bg-blue-950 w-2/5  h-screen hidden sm:flex flex-col px-5 border-r border-black">
+      <div className="bg-blue-950 h-screen hidden sm:flex flex-col px-5 border-r border-black">
         <div className="px-3 mt-5 flex justify-between">
           <h2
             className=" text-3xl text-blue-100 "
@@ -39,6 +66,15 @@ export default function ChatRooms() {
             Chats
           </h2>
           <div className="flex gap-4">
+            <button onClick={handleLogout}>
+              <IconLogout2
+                stroke={2}
+                className={`text-blue-100 focus:outline-none bg-red-800 focus:ring-2 focus:ring-blue-200 hover:bg-red-600 rounded-md p-2 ${
+                  edit ? "bg-blue-700" : "bg-transparent"
+                }`}
+                size={42}
+              />
+            </button>
             <div className="relative">
               <IconEdit
                 stroke={2}
@@ -67,16 +103,12 @@ export default function ChatRooms() {
                     placeholder="Search by Room name"
                   />
                 </div>
-                <div className="h-[50px] p-2 flex hover:bg-blue-500/40 rounded-md  items-center">
-                  <IconLibraryPlus stroke={2} className=" text-white mr-2" />
-                  {/* <img
-                    src="/images/image.png"
-                    alt=""
-                    style={{ width: "30px", height: "30px" }}
-                    className="rounded-full mr-2"
-                  /> */}
-                  <h2 className="text-blue-200 text-sm ">New Room</h2>
-                </div>
+                <Link to={`/create-room/`}>
+                  <div className="h-[50px] p-2 flex hover:bg-blue-500/40 rounded-md  items-center">
+                    <IconLibraryPlus stroke={2} className=" text-white mr-2" />
+                    <h2 className="text-blue-200 text-sm ">New Room</h2>
+                  </div>
+                </Link>
                 <div className="p-2 text-blue-200 text-md">
                   Frequently Contacted
                 </div>

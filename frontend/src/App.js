@@ -1,26 +1,28 @@
-import logo from "./logo.svg";
 import "./App.css";
-import Navbar from "./components/Navbar.js";
-
 import ChatRooms from "./components/ChatRooms.js";
+import CreateRoom from "./components/CreateRoom.js";
 import Room from "./components/Room.js";
-import { useEffect, useState } from "react";
 import DefaultRoom from "./components/DefaultRoom.js";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import LoginPage from "./components/LoginPage.js";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import RegisterPage from "./components/RegisterPage.js";
+import ProtectedRoutes from "./components/ProtectedRoutes.js";
 
 function App() {
   return (
     <>
       <Router>
-        <div className="h-full flex ">
-          <ChatRooms />
+        <>
           <Routes>
-            <Route path="/" element={<DefaultRoom />} />
-            <Route path="/room/:slug" element={<Room />} />
-            <Route path="/create-room/" element={<CreateRoom />} />
+            <Route path="/login/" element={<LoginPage />}></Route>
+            <Route path="/register/" element={<RegisterPage />}></Route>
+            <Route element={<ProtectedRoutes />}>
+              <Route path="/default/" element={<DefaultRoom />} />
+              <Route path="/room/:slug" element={<Room />} />
+              <Route path="/create-room/" element={<CreateRoom />} />
+            </Route>
           </Routes>
-        </div>
+        </>
       </Router>
     </>
   );

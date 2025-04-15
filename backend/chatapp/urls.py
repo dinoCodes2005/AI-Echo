@@ -28,6 +28,6 @@ router.register(r'api/get-message',ChatMessageViewSet)
 
 urlpatterns = [
     path('',include(router.urls)),
+    path('create-room/',views.create_room,name="create_room"),
     path('api/create/',views.create_message,name="create_message"),
-    path('api/current-user/',views.current_user,name="current_user"),
 ]
