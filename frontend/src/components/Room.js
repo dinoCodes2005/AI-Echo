@@ -10,7 +10,9 @@ import Picker from "emoji-picker-react";
 import { IconMoodSmileBeam } from "@tabler/icons-react";
 import axios from "axios";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import useCheckAuthentication from "../api/fetchUser.js";
+import useCheckAuthentication from "../api/check-auth.js";
+import fetchUser from "../api/fetch-user.js";
+import useWebSocket, { ReadyState } from "react-use-websocket";
 
 export default function Room() {
   const location = useLocation();
@@ -23,15 +25,33 @@ export default function Room() {
   const [dropdown, setDropdown] = useState(false);
   const messagesEndRef = useRef(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
-
   const [message, setMessage] = useState("");
   const { username, isLoggedIn } = useCheckAuthentication();
+  const [messages, setMessages] = useState([]);
+
+  const socketUrl = `ws://127.0.0.1:8000/ws/${slug}/`;
+
+  const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(
+    socketUrl,
+    {
+      onOpen: () => console.log("WebSocket connection opened on Frontend!"),
+      shouldReconnect: (closeEvent) => true, // auto-reconnect
+    }
+  );
+
+  useEffect(() => {
+    if (lastJsonMessage !== null) {
+      setMessages((prev) => [...prev, lastJsonMessage]);
+    }
+  }, [lastJsonMessage]);
 
   const formatTime = (timeString) => {
+    if (!timeString) return "--/--";
     return timeString.slice(0, 5);
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return "--/--";
     return dateString.slice(5, 10);
   };
 
@@ -42,56 +62,36 @@ export default function Room() {
 
   // Loads messages when the room changes
   useEffect(() => {
-    const loadMessages = async () => {
-      const newMessages = await fetchMessages();
-      setItems(newMessages);
+    const fetchMessages = async () => {
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:8000/chatapp/api/get-message/`,
+          {
+            params: {
+              room: room?.slug,
+            },
+          }
+        );
+        setMessages(response.data);
+      } catch (error) {
+        console.log("Error:", error);
+        setMessages([]);
+      }
     };
-    loadMessages();
-  }, [slug]);
+    fetchMessages();
+  }, [slug, room.slug, lastJsonMessage]);
 
   // Scroll to bottom when messages are loaded or new messages are added
   useEffect(() => {
     scrollToBottom();
-  }, [items, typedMessages]);
+  }, [messages]);
 
-  // Fetching message objects
-  const fetchMessages = async () => {
-    try {
-      const response = await axios.get(
-        `http://127.0.0.1:8000/chatapp/api/get-message/`,
-        {
-          params: {
-            room: room?.slug,
-          },
-        }
-      );
-      return response.data;
-    } catch (error) {
-      console.log("Error:", error);
-      return [];
+  const handleFormSubmit = async () => {
+    if (message.trim() !== "") {
+      sendJsonMessage({ message: message, username: username, room: slug });
+      setMessage("");
     }
   };
-
-  // Handling form submit; data is passed from the child to the parent here
-  const handleFormSubmit = ({ message, date, time }) => {
-    const messageObject = {
-      message,
-      date: new Date().toLocaleDateString(),
-      time: new Date().toLocaleTimeString(),
-    };
-    setTypedMessages([...typedMessages, messageObject]);
-  };
-
-  // For rendering the loaded messages which is passed to JSX
-  const loadedMessages = items.map((item, index) => (
-    <ChatBubble
-      className="px-5"
-      message={item.message_content}
-      date={formatDate(item.date)}
-      time={formatTime(item.time)}
-      key={item.id}
-    />
-  ));
 
   const handleChange = (e) => {
     setMessage(e.target.value);
@@ -212,14 +212,19 @@ export default function Room() {
             {/* Messages container */}
             <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
               <div className="flex flex-col p-4 pb-20">
-                {loadedMessages}
-                {typedMessages.map((item, index) => (
+                {messages.map((item, index) => (
                   <ChatBubble
-                    className="px-5"
-                    message={item.message}
+                    username={
+                      item.user?.username ||
+                      item.user ||
+                      item.sender ||
+                      "Unknown"
+                    }
+                    currentUser={username}
+                    message={item.message_content}
                     date={formatDate(item.date)}
                     time={formatTime(item.time)}
-                    key={index}
+                    key={item.id || index}
                   />
                 ))}
                 <div ref={messagesEndRef} />

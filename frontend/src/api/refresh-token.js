@@ -2,7 +2,7 @@ import React from "react";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 
-export default function refreshToken() {
+export default async function refreshToken() {
   const accessToken = localStorage.getItem("accessToken");
   const refreshToken = localStorage.getItem("refreshToken");
   const isTokenExpired = (token) => {
@@ -15,7 +15,10 @@ export default function refreshToken() {
       return true;
     }
   };
-  const getToken = async () => {
+
+  if (!accessToken || !refreshToken) return;
+
+  if (isTokenExpired(accessToken)) {
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/accounts/token/refresh/",
@@ -24,8 +27,9 @@ export default function refreshToken() {
       if (response.data && response.data.access)
         localStorage.setItem("accessToken", response.data.access);
     } catch (error) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       console.log("Error refreshing Token : ", error);
     }
-  };
-  isTokenExpired(accessToken) && getToken();
+  }
 }

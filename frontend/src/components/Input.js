@@ -4,7 +4,7 @@ import { IconMicrophone } from "@tabler/icons-react";
 import { IconTrash } from "@tabler/icons-react";
 import Picker from "emoji-picker-react";
 import axios from "axios";
-import useCheckAuthentication from "../api/fetchUser";
+import useCheckAuthentication from "../api/fetch-user";
 
 export default function Input(props) {
   const [micActive, setMicActive] = useState(false);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import refreshToken from "./refreshToken";
+import refreshToken from "./refresh-token";
 
 export default function useCheckAuthentication() {
   const [username, setUsername] = useState("");

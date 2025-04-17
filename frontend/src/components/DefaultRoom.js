@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { IconMessageChatbot } from "@tabler/icons-react";
 import ChatRooms from "./ChatRooms";
 import axios from "axios";
-import useCheckAuthentication from "../api/fetchUser";
+import useCheckAuthentication from "../api/check-auth";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 export default function DefaultRoom() {

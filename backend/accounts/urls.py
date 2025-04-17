@@ -1,4 +1,6 @@
 from django.urls import path
+
+from chatapp.views import fetch_user
 from .views import *
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -8,4 +10,5 @@ urlpatterns = [
     path("logout/",UserLogoutAPIView.as_view(),name="logout-user"),
     path('token/refresh/',TokenRefreshView.as_view(),name="token-refresh"),
     path('user/',UserInfoAPIView.as_view(),name="user-info"),
+    path('fetch-user/<int:id>/',fetch_user,name="fetch-user"),
 ]
