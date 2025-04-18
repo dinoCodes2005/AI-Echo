@@ -57,7 +57,7 @@ export default function ChatRooms() {
 
   return (
     <>
-      <div className="bg-blue-950 h-screen hidden sm:flex flex-col px-5 border-r border-black">
+      <div className="bg-blue-950 h-screen hidden sm:flex flex-col px-5 border-r border-black ">
         <div className="px-3 mt-5 flex justify-between">
           <h2
             className=" text-3xl text-blue-100 "
@@ -69,9 +69,7 @@ export default function ChatRooms() {
             <button onClick={handleLogout}>
               <IconLogout2
                 stroke={2}
-                className={`text-blue-100 focus:outline-none bg-red-800 focus:ring-2 focus:ring-blue-200 hover:bg-red-600 rounded-md p-2 ${
-                  edit ? "bg-blue-700" : "bg-transparent"
-                }`}
+                className={`text-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-200 hover:bg-red-600 rounded-md p-2`}
                 size={42}
               />
             </button>
@@ -89,7 +87,7 @@ export default function ChatRooms() {
                 }}
               />
               <div
-                className={`absolute px-1 pb-1 top-[120%] bg-blue-600/40 backdrop-blur-sm h-auto origin-top-left ${
+                className={`absolute px-1 pb-1 top-[120%] right-1/4 bg-blue-600/40 backdrop-blur-sm h-auto origin-top-right ${
                   edit ? "scale-1" : "scale-0"
                 } z-10 transition-all duration-200 rounded-md `}
               >
@@ -129,7 +127,7 @@ export default function ChatRooms() {
                 }}
               />
               <div
-                className={`absolute px-1 pb-1 top-[120%] h-auto bg-blue-600/40 backdrop-blur-sm origin-top-left ${
+                className={`absolute px-1 pb-1 top-[120%] right-1/4 h-auto bg-blue-600/40 backdrop-blur-sm origin-top-right ${
                   filter ? "scale-1" : "scale-0"
                 } z-10 transition-all duration-200 rounded-md `}
               >

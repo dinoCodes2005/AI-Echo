@@ -30,4 +30,8 @@ urlpatterns = [
     path('',include(router.urls)),
     path('create-room/',views.create_room,name="create_room"),
     path('api/create/',views.create_message,name="create_message"),
+    path('api/delete/',views.delete_message,name="delete_message"),
+    path('api/fetch-reply/',views.fetch_reply,name="fetch-reply"),
+    
+    
 ]

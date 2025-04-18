@@ -1,5 +1,10 @@
 import Input from "./Input.js";
-import { IconBrandTelegram, IconSearch } from "@tabler/icons-react";
+import {
+  IconBrandTelegram,
+  IconChevronDown,
+  IconSearch,
+  IconTrash,
+} from "@tabler/icons-react";
 import GeminiSVG from "./GeminiSVG.js";
 import { useState, useReducer, useEffect, useRef } from "react";
 import { useParams, useLocation, Link } from "react-router-dom";
@@ -13,6 +18,10 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import useCheckAuthentication from "../api/check-auth.js";
 import fetchUser from "../api/fetch-user.js";
 import useWebSocket, { ReadyState } from "react-use-websocket";
+import SummariseChat from "./SummariseChat.js";
+import { IconDeselect } from "@tabler/icons-react";
+import useIsMobile from "./UseIsMobile.js";
+import Navbar from "./Navbar.js";
 
 export default function Room() {
   const location = useLocation();
@@ -23,11 +32,20 @@ export default function Room() {
   const [items, setItems] = useState([]);
   const [typedMessages, setTypedMessages] = useState([]);
   const [dropdown, setDropdown] = useState(false);
+  const [summarise, setSummarise] = useState(false);
   const messagesEndRef = useRef(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [message, setMessage] = useState("");
   const { username, isLoggedIn } = useCheckAuthentication();
   const [messages, setMessages] = useState([]);
+  const [checkedMessages, setCheckedMessages] = useState([]);
+  const [deselect, setDeselect] = useState(false);
+  const [summarisedMessage, setSummarisedMessage] = useState(
+    "No Messages Selected. Select Message using the ✔️ button beside the message to summarise them."
+  );
+  const [navbar, setNavbar] = useState(false);
+
+  const isMobile = useIsMobile();
 
   const socketUrl = `ws://127.0.0.1:8000/ws/${slug}/`;
 
@@ -38,6 +56,10 @@ export default function Room() {
       shouldReconnect: (closeEvent) => true, // auto-reconnect
     }
   );
+
+  useEffect(() => {
+    console.log(checkedMessages);
+  }, [checkedMessages]);
 
   useEffect(() => {
     if (lastJsonMessage !== null) {
@@ -98,16 +120,76 @@ export default function Room() {
     console.log(message);
   };
 
+  const generateReply = (reply) => {
+    setMessage(reply);
+  };
+
+  const handleSearch = (e) => {
+    const regex = new RegExp(e.target.value, "i");
+    messages.forEach((message) => {
+      if (regex.test(message.message_content)) {
+        const search = document.getElementById(message.id);
+        if (search)
+          search.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
+  };
+
+  const summariseChat = (e) => {
+    e.preventDefault();
+    setDropdown(false);
+    setSummarise(true);
+    if (checkedMessages.length == 0) return;
+    const sortedMessages = checkedMessages.sort((a, b) => a.id - b.id);
+    const prompt = `You are given a list of chat messages between users.
+    Summarize the conversation in plain text, with no formatting, symbols, or extra characters.
+     Focus only on what was discussed. Messages:
+    ${sortedMessages
+      .map((msg) => `${msg.username.trim()}: ${msg.message.trim()}`)
+      .join("\n")}
+    My name is ${username}.`;
+    fetch("http://127.0.0.1:8000/chatapp/api/fetch-reply/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt: prompt }),
+    })
+      .then((response) => {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        setSummarisedMessage("");
+        let result = "";
+        function readChunk() {
+          reader.read().then(({ done, value }) => {
+            if (done) return;
+            const chunk = decoder.decode(value);
+            result += chunk;
+            setSummarisedMessage((prev) => prev + chunk);
+            readChunk();
+          });
+        }
+        readChunk();
+      })
+      .catch((error) => {
+        console.log("Some error in getting reply in the frontend");
+      });
+  };
+
   return (
     <div className="h-screen flex overflow-hidden">
       <PanelGroup direction="horizontal">
-        <Panel minSize={20} defaultSize={30} maxSize={40}>
-          <div className="h-full overflow-hidden">
-            <ChatRooms />
-          </div>
-        </Panel>
+        {!isMobile && (
+          <Panel minSize={20} defaultSize={30} maxSize={40}>
+            <div className="h-full ">
+              <ChatRooms />
+            </div>
+          </Panel>
+        )}
 
-        <PanelResizeHandle className="w-1 bg-gray-800 hover:bg-blue-600 transition-colors" />
+        {!isMobile && (
+          <PanelResizeHandle className="w-1 bg-gray-800 hover:bg-blue-600 transition-colors" />
+        )}
 
         <Panel>
           <div
@@ -158,6 +240,44 @@ export default function Room() {
               </div>
 
               <div className="flex mr-5 items-center">
+                <button
+                  className="self-start m-2 hover:bg-red-600 rounded-md p-2 flex justify-center"
+                  onClick={() => {
+                    setCheckedMessages([]);
+                    setDeselect(true);
+                  }}
+                >
+                  <IconTrash
+                    stroke={2}
+                    className={`text-blue-100 focus:outline-none md:mr-2 focus:ring-2 focus:ring-blue-200  `}
+                    size={20}
+                  />
+                  <h2
+                    className=" text-md text-white hidden lg:inline-block"
+                    style={{ fontFamily: "Poppins" }}
+                  >
+                    Delete
+                  </h2>
+                </button>
+                <button
+                  className="self-start m-2 hover:bg-red-600 rounded-md p-2 flex justify-center"
+                  onClick={() => {
+                    setCheckedMessages([]);
+                    setDeselect(true);
+                  }}
+                >
+                  <IconDeselect
+                    stroke={2}
+                    className={`text-blue-100 focus:outline-none md:mr-2 focus:ring-2 focus:ring-blue-200  `}
+                    size={20}
+                  />
+                  <h2
+                    className=" text-md text-white hidden  lg:inline-block "
+                    style={{ fontFamily: "Poppins" }}
+                  >
+                    Deselect
+                  </h2>
+                </button>
                 <div className="relative">
                   <button
                     onClick={() => {
@@ -174,12 +294,21 @@ export default function Room() {
                     }`}
                   >
                     <div className="bg-transparent rounded-md p-2 hover:bg-blue-950 text-gray-300 cursor-pointer">
-                      Summarise Chat
+                      <button onClick={summariseChat}> Summarise Chat</button>
                     </div>
                     <div className="bg-transparent rounded-md p-2 hover:bg-blue-950 text-gray-300 cursor-pointer">
                       Talk with Gemini
                     </div>
                   </div>
+
+                  <SummariseChat
+                    tabIndex={0}
+                    summarise={summarise}
+                    setSummarise={setSummarise}
+                    summarisedMessage={summarisedMessage}
+                    setSummarisedMessage={setSummarisedMessage}
+                    setCheckedMessages={setCheckedMessages}
+                  />
                 </div>
 
                 <div className="hidden sm:flex">
@@ -191,6 +320,7 @@ export default function Room() {
                       isExpanded ? "p-2" : "p-0"
                     }`}
                     placeholder="Search Chats..."
+                    onKeyUp={handleSearch}
                   />
 
                   <IconSearch
@@ -208,10 +338,31 @@ export default function Room() {
                 />
               </div>
             </div>
+            {isMobile && <Navbar navbar={navbar} />}
 
             {/* Messages container */}
             <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
-              <div className="flex flex-col p-4 pb-20">
+              {isMobile && (
+                <div
+                  onClick={() => {
+                    setNavbar(!navbar);
+                  }}
+                  className="self-end mr-2 z-100 transparent right-0 fixed"
+                >
+                  <button
+                    className={`mr-2 mt-2 origin-left duration-100 transition-all bg-slate-900 rounded p-1  `}
+                  >
+                    <IconChevronDown
+                      stroke={2}
+                      size={20}
+                      className={`text-gray-400 hover:text-white ${
+                        navbar && "rotate-180"
+                      }`}
+                    />
+                  </button>
+                </div>
+              )}
+              <div className="flex flex-col pb-20">
                 {messages.map((item, index) => (
                   <ChatBubble
                     username={
@@ -225,9 +376,17 @@ export default function Room() {
                     date={formatDate(item.date)}
                     time={formatTime(item.time)}
                     key={item.id || index}
+                    messageId={item.id}
+                    generateReply={generateReply}
+                    sendJsonMessage={sendJsonMessage}
+                    lastJsonMessage={lastJsonMessage}
+                    setCheckedMessages={setCheckedMessages}
+                    checkedMessages={checkedMessages}
+                    deselect={deselect}
+                    setDeselect={setDeselect}
                   />
                 ))}
-                <div ref={messagesEndRef} />
+                <div ref={messagesEndRef}></div>
               </div>
             </div>
 
@@ -253,6 +412,11 @@ export default function Room() {
                 placeholder="Type a message"
                 value={message}
                 onChange={handleChange}
+                onKeyUp={(e) => {
+                  if (e.key === "Enter") {
+                    handleFormSubmit();
+                  }
+                }}
               />
 
               <button

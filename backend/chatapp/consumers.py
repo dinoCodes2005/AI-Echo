@@ -2,10 +2,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
-from django.contrib.auth.models import User
-
 from accounts.models import CustomUser
-
 from .models import ChatMessage, ChatRoom
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -39,21 +36,37 @@ class ChatConsumer(AsyncWebsocketConsumer):
     '''
     async def receive(self, text_data):
         data = json.loads(text_data)
-        message = data['message']
         username = data['username']
-        room = data['room']
-        await self.save_message(username,room,message)
+        if data.get("type") == "delete_message":
+            messageId = data["messageId"]
+            success = await self.delete_message(messageId)
+            if success:
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        "type": "delete_message_broadcast",
+                        "messageId": messageId,
+                        "username": username,
+                    }
+                )
+            else:
+                await self.send(text_data=json.dumps({
+                    "type": "error",
+                    "error": "Message does not exist",
+                }))
+        else:
+            message = data['message'] 
+            room = data['room']
+            await self.save_message(username,room,message)
+            await self.channel_layer.group_send(
+                self.room_group_name,{
+                    'type':'chat_message',
+                    'message':message,
+                    'username':username,
+                    'room':room,
+                }
+            )
         
-        await self.channel_layer.group_send(
-            self.room_group_name,{
-                'type':'chat_message',
-                'message':message,
-                'username':username,
-                'room':room,
-            }
-        )
-        
-        await self.save_message(username,room,message)
     
     async def chat_message(self,event):
         message = event['message']
@@ -74,4 +87,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
         room = ChatRoom.objects.get(slug=room)
         message = ChatMessage.objects.create(user = user, room = room , message_content = message)
         return message
+    
+    @database_sync_to_async
+    def delete_message(self,messageId):
+        try:
+            message = ChatMessage.objects.get(id=messageId)
+            message.delete()
+            return True
+        except ChatMessage.DoesNotExist:
+            return False
+        
+    async def delete_message_broadcast(self, event):
+        await self.send(text_data=json.dumps({
+        "type": "delete_success",
+        "messageId": event["messageId"],
+        "username": event["username"]
+    }))
+
+        
+        
+        
     

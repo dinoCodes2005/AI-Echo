@@ -7,8 +7,11 @@ import LoginPage from "./components/LoginPage.js";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import RegisterPage from "./components/RegisterPage.js";
 import ProtectedRoutes from "./components/ProtectedRoutes.js";
+import useIsMobile from "./components/UseIsMobile.js";
+import Navbar from "./components/Navbar.js";
 
 function App() {
+  const isMobile = useIsMobile();
   return (
     <>
       <Router>
