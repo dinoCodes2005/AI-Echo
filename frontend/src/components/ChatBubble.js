@@ -95,7 +95,7 @@ export default function ChatBubble(props) {
     <div
       id={props.messageId}
       className={`flex relative m-4 space-x-3 max-w-[600px] px-5 ${
-        props.currentUser !== props.username ? "" : "self-end"
+        props.currentUser !== props.username ? "" : "self-end mb-4"
       }`}
       onMouseEnter={() => {
         setPop(true);
@@ -107,7 +107,7 @@ export default function ChatBubble(props) {
       <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300"></div>
       {props.username === props.currentUser && (
         <div
-          className={`absolute bottom-[110%] origin-bottom transition-all duration-200 rounded bg-gray-950 left-1/3 p-2 ${
+          className={`absolute bottom-[50%] origin-bottom-right transition-all z-100 duration-200 rounded bg-gray-950 left-1/3 p-2 ${
             reply ? "scale-1" : "scale-0"
           }`}
         >

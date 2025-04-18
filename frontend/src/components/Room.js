@@ -22,6 +22,7 @@ import SummariseChat from "./SummariseChat.js";
 import { IconDeselect } from "@tabler/icons-react";
 import useIsMobile from "./UseIsMobile.js";
 import Navbar from "./Navbar.js";
+import { IconMoodSad } from "@tabler/icons-react";
 
 export default function Room() {
   const location = useLocation();
@@ -362,37 +363,53 @@ export default function Room() {
                   </button>
                 </div>
               )}
-              <div className="flex flex-col pb-20">
-                {messages.map((item, index) => (
-                  <ChatBubble
-                    username={
-                      item.user?.username ||
-                      item.user ||
-                      item.sender ||
-                      "Unknown"
-                    }
-                    currentUser={username}
-                    message={item.message_content}
-                    date={formatDate(item.date)}
-                    time={formatTime(item.time)}
-                    key={item.id || index}
-                    messageId={item.id}
-                    generateReply={generateReply}
-                    sendJsonMessage={sendJsonMessage}
-                    lastJsonMessage={lastJsonMessage}
-                    setCheckedMessages={setCheckedMessages}
-                    checkedMessages={checkedMessages}
-                    deselect={deselect}
-                    setDeselect={setDeselect}
-                  />
-                ))}
+              <div className="flex h-full flex-col pb-20">
+                {messages.length > 0 ? (
+                  messages.map((item, index) => (
+                    <ChatBubble
+                      username={
+                        item.user?.username ||
+                        item.user ||
+                        item.sender ||
+                        "Unknown"
+                      }
+                      currentUser={username}
+                      message={item.message_content}
+                      date={formatDate(item.date)}
+                      time={formatTime(item.time)}
+                      key={item.id || index}
+                      messageId={item.id}
+                      generateReply={generateReply}
+                      sendJsonMessage={sendJsonMessage}
+                      lastJsonMessage={lastJsonMessage}
+                      setCheckedMessages={setCheckedMessages}
+                      checkedMessages={checkedMessages}
+                      deselect={deselect}
+                      setDeselect={setDeselect}
+                    />
+                  ))
+                ) : (
+                  <div className="self-center my-auto text-white flex flex-col items-center gap-4 p-6 bg-slate-900 rounded-2xl shadow-xl border border-slate-800">
+                    <h2 className="text-3xl font-semibold text-cyan-200">
+                      This Room is Empty !!
+                    </h2>
+                    <IconMoodSad
+                      stroke={2}
+                      size={48}
+                      className="text-blue-100"
+                    />
+                    <h2 className="text-lg text-center text-blue-100">
+                      Send Messages Now !!
+                    </h2>
+                  </div>
+                )}
                 <div ref={messagesEndRef}></div>
               </div>
             </div>
 
             {/* Input area */}
 
-            <div className="flex w-full p-4 bg-gray-900 relative items-end">
+            <div className="flex w-full p-4 bg-gray-900 relative items-end mt-2">
               <button
                 onClick={() => setEmojiOpen(!emojiOpen)}
                 className="flex items-center justify-center h-full bg-blue-500 mr-4 hover:bg-blue-600 rounded-xl text-white px-4 py-1 flex-shrink-0"
