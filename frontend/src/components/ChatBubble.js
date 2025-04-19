@@ -3,6 +3,7 @@ import { IconArrowDown, IconTrash } from "@tabler/icons-react";
 import { IconCheck } from "@tabler/icons-react";
 import { IconChecks } from "@tabler/icons-react";
 import axios from "axios";
+import fetchUser from "../api/fetch-user";
 
 export default function ChatBubble(props) {
   const [pop, setPop] = useState(false);
@@ -47,7 +48,16 @@ export default function ChatBubble(props) {
   };
 
   const replyWithGemini = async () => {
-    const prompt = `Give me an appropriate reply for this message (Instruction: Respond in plain text only. No formatting, no markdown, no symbols like , #, or quotes. Only the message): '${username} -> ${message}' : My name is ${props.currentUser}`;
+    const prompt = `Give me an appropriate reply for this message.
+    (Information about the sender and preference :
+     Name: ${props.username},
+     Age: ${props.profile.age},
+     AI Response Length : ${props.profile.ai_response_length},
+     AI Tone : ${props.profile.ai_tone},
+     Preferred Domains : ${props.profile.preferred_domains},
+     Preferred Response Format : ${props.profile.preferred_response_format})
+    (Instruction: Respond in plain text only. No formatting, no markdown, no symbols like , #, or quotes. Only the message):
+     Message : '${username} -> ${message}'`;
     fetch("http://127.0.0.1:8000/chatapp/api/fetch-reply/", {
       method: "POST",
       headers: {

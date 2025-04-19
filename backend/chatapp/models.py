@@ -5,9 +5,10 @@ from accounts.models import CustomUser
 
 # Create your models here.
 class ChatRoom(models.Model):
+    owners = models.ManyToManyField(CustomUser, related_name='owned_rooms', blank=True)
     name = models.CharField(max_length = 100)
     slug = models.SlugField(unique=True)
-    image = models.ImageField(upload_to='room_images/', null=True, blank=True)
+    image = models.ImageField(upload_to='room_images/', null=True, blank=True,default="profile_pics/default_profile_pic.jpg")
     
     def __str__(self):
         return self.name

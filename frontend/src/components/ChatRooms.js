@@ -10,14 +10,31 @@ import { IconX } from "@tabler/icons-react";
 import { IconLibraryPlus } from "@tabler/icons-react";
 import { IconLogout2 } from "@tabler/icons-react";
 import axios from "axios";
+import useIsMobile from "./UseIsMobile.js";
+import { IconSettings } from "@tabler/icons-react";
+import { IconHelp } from "@tabler/icons-react";
+import fetchUser from "../api/fetch-user.js";
+import { jwtDecode } from "jwt-decode";
 
 export default function ChatRooms() {
   const fetch_rooms_url = "http://127.0.0.1:8000/chatapp/chat-rooms/";
   const navigate = useNavigate();
   //set rooms is for fetching the room objects
   const [rooms, setRooms] = useState([]);
+  const isMobile = useIsMobile();
   //set query is for searching
   const [query, setQuery] = useState("");
+  const [user, setUser] = useState({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const userData = await fetchUser();
+      setUser(userData);
+    };
+    fetchData();
+  }, []);
+
+  const [hover, setHover] = useState(false);
   useEffect(() => {
     fetch(fetch_rooms_url)
       .then((response) => response.json())
@@ -45,7 +62,6 @@ export default function ChatRooms() {
           { refresh: refreshToken },
           config
         );
-        console.log(response);
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         navigate("/login/");
@@ -199,6 +215,49 @@ export default function ChatRooms() {
             ))
           ) : (
             <h2 className="text-2xl text-white mt-10 ">No Result</h2>
+          )}
+
+          {!isMobile && (
+            <div
+              className={`fixed bottom-0 left-0 ml-4 mb-4 flex items-center justify-center gap-2`}
+              onMouseEnter={() => setHover(true)} // On hover, set hovered to true
+              onMouseLeave={() => setHover(false)} // On mouse leave, set hovered to false
+            >
+              <Link to={"/profile/"} className="z-10">
+                <img
+                  src={user?.profile?.profileImage || "/images/image.png"}
+                  className="rounded-full size-12 cursor-pointer  object-cover hover:scale-125 transition-all duration-200"
+                  alt=""
+                />
+              </Link>
+
+              <button
+                className={`absolute z-1 transition-all duration-300 ease-in-out  ${
+                  hover ? "left-16 rotate-180" : "left-0 rotate-0"
+                }`}
+              >
+                <Link to={"/settings/"}>
+                  <IconSettings
+                    stroke={2}
+                    size={30}
+                    className="text-cyan-100 hover:text-white"
+                  />
+                </Link>
+              </button>
+              <button
+                className={`absolute z-1 transition-all duration-300 ease-in-out ${
+                  hover ? "left-24 rotate-0" : "left-0 rotate-180"
+                }`}
+              >
+                <Link>
+                  <IconHelp
+                    stroke={2}
+                    size={30}
+                    className="text-cyan-100 hover:text-white"
+                  />
+                </Link>
+              </button>
+            </div>
           )}
         </div>
       </div>

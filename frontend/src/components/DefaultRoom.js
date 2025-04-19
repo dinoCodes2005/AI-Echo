@@ -7,6 +7,7 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 export default function DefaultRoom() {
   const { username, isLoggedIn } = useCheckAuthentication();
+
   return (
     <>
       <div className="h-full flex ">
@@ -32,6 +33,7 @@ export default function DefaultRoom() {
               <h2 className="text-xl text-cyan-200 font-semibold opacity-70">
                 Chat Seamlessly with users via AI generated replies
               </h2>
+              <h2></h2>
               <h2 className="text-xl text-cyan-200 font-semibold opacity-90">
                 @{username}
               </h2>

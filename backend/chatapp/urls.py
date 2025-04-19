@@ -20,7 +20,7 @@ from django.urls import path,include
 from httpx import request
 from . import views
 from rest_framework.routers import DefaultRouter
-from .views import ChatMessageViewSet, ChatRoomViewSet
+from .views import ChatMessageViewSet, ChatRoomViewSet,CreateRoomAPIView
 
 router = DefaultRouter()
 router.register(r'chat-rooms', ChatRoomViewSet)
@@ -28,7 +28,7 @@ router.register(r'api/get-message',ChatMessageViewSet)
 
 urlpatterns = [
     path('',include(router.urls)),
-    path('create-room/',views.create_room,name="create_room"),
+    path('create-room/',CreateRoomAPIView.as_view(),name="create_room"),
     path('api/create/',views.create_message,name="create_message"),
     path('api/delete/',views.delete_message,name="delete_message"),
     path('api/fetch-reply/',views.fetch_reply,name="fetch-reply"),

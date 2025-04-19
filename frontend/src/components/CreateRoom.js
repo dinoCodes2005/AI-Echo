@@ -24,23 +24,29 @@ export default function CreateRoom() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
+    const roomSlug = slugify(name, { lower: true, strict: true });
     formData.append("name", name);
-    formData.append("image", image);
-    formData.append("slug", slugify(name, { lower: true, strict: true }));
+    formData.append("slug", roomSlug);
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput && fileInput.files[0]) {
+      formData.append("image", fileInput.files[0]);
+    }
     console.log(formData);
 
     try {
+      const token = localStorage.getItem("accessToken");
       const response = await axios.post(
         "http://127.0.0.1:8000/chatapp/create-room/",
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
         }
       );
-      if (response.status === 200) {
-        const data = await response.json();
-        console.log("Response message", data.message);
-        navigate("/create-room/");
+      if (response.status >= 200 && response.status <= 299) {
+        navigate(`/default/?room_created=true`);
       }
     } catch (error) {
       console.error("failed creating room");

@@ -1,12 +1,14 @@
 from calendar import prmonth
 from django.shortcuts import render
 from grpc import Status
+from rest_framework.response import Response
 
 from accounts.models import CustomUser
 
 from .models import ChatMessage, ChatRoom
 from .serializers import ChatMessageSerializer, ChatRoomSerializer
 from rest_framework import viewsets
+from rest_framework.generics import GenericAPIView
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
 import json
@@ -17,6 +19,9 @@ from django.shortcuts import get_object_or_404
 import google.generativeai as genai
 from django.http import StreamingHttpResponse
 from django.conf import settings
+from rest_framework.permissions import AllowAny , IsAuthenticated
+from rest_framework import status
+
 
 # Create your views here.
 
@@ -69,17 +74,22 @@ def delete_message(request):
     else:
         return JsonResponse({"error":"Method not allowed. Use POST"},
                             status=405)
-    
 
-@csrf_exempt  
-def create_room(request):
-    if request.method == "POST":
-        form = ChatRoomForm(request.POST,request.FILES)
-        print(request.POST)
-        if form.is_valid():
-            form.save()
-            return JsonResponse({'message':'Room has been created'},status=200)
-    return JsonResponse({'error':form.errors})
+class CreateRoomAPIView(GenericAPIView):
+    serializer_class = ChatRoomSerializer
+    permission_classes = (IsAuthenticated,)
+    def post(self,request,*args,**kwargs):
+        serializer = self.get_serializer(data=request.data)
+        admin = CustomUser.objects.filter(is_staff = True).first()
+        if serializer.is_valid():
+            chat_room = serializer.save()
+            chat_room.owners.add(admin)
+            if admin is not request.user:
+                chat_room.owners.add(request.user)
+            chat_room.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        else :
+            return Response(serializer.errors,status = status.HTTP_400_BAD_REQUEST)
 
 @csrf_exempt
 def fetch_user(request,id):

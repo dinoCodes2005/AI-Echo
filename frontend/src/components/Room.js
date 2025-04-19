@@ -58,10 +58,15 @@ export default function Room() {
     }
   );
 
+  const [user, setUser] = useState();
   useEffect(() => {
-    console.log(checkedMessages);
-  }, [checkedMessages]);
-
+    const fetchData = async () => {
+      const userData = await fetchUser();
+      console.log(userData.profile);
+      setUser(userData.profile);
+    };
+    fetchData();
+  }, []);
   useEffect(() => {
     if (lastJsonMessage !== null) {
       setMessages((prev) => [...prev, lastJsonMessage]);
@@ -118,7 +123,6 @@ export default function Room() {
 
   const handleChange = (e) => {
     setMessage(e.target.value);
-    console.log(message);
   };
 
   const generateReply = (reply) => {
@@ -386,6 +390,7 @@ export default function Room() {
                       checkedMessages={checkedMessages}
                       deselect={deselect}
                       setDeselect={setDeselect}
+                      profile={user}
                     />
                   ))
                 ) : (

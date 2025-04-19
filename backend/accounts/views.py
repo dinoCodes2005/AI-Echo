@@ -1,6 +1,7 @@
+from accounts.models import Profile
 from tkinter.tix import Tree
 from django.shortcuts import render
-from rest_framework.generics import GenericAPIView , RetrieveAPIView
+from rest_framework.generics import GenericAPIView , RetrieveAPIView , UpdateAPIView
 from rest_framework.permissions import AllowAny , IsAuthenticated
 from .serializers import *
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -16,6 +17,7 @@ class UserRegistrationAPIView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+        Profile.objects.create(user=user)
         token = RefreshToken.for_user(user)
         data = serializer.data
         data["tokens"] = {
@@ -58,4 +60,17 @@ class UserInfoAPIView(RetrieveAPIView):
     
     def get_object(self):
         return self.request.user
-            
+    
+class ProfileUpdateAPIView(UpdateAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = (IsAuthenticated,)
+    
+    def get_object(self):
+        return self.request.user.profile
+    
+class CustomUserUpdateAPIView(UpdateAPIView):
+    serializer_class = CustomUserSerializer
+    permission_classes = (IsAuthenticated,)
+    
+    def get_object(self):
+        return self.request.user

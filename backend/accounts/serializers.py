@@ -1,13 +1,21 @@
 
-from .models import CustomUser
+from attr import fields
+from .models import CustomUser, Profile
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 
 
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields ='__all__'
+        
 class CustomUserSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer(read_only=True)
     class Meta:
         model = CustomUser
-        fields = ("id",'username','email')
+        fields = ("id",'username','email','profile','first_name','last_name')
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True)
@@ -38,3 +46,6 @@ class UserLoginSerializer(serializers.Serializer):
         if user and user.is_active:
             return user
         raise serializers.ValidationError("Incorrect Credentials")
+    
+
+        
