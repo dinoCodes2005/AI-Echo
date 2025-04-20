@@ -47,6 +47,7 @@ export default function Room() {
   );
   const [navbar, setNavbar] = useState(false);
   const [reply, setReply] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const isMobile = useIsMobile();
 
@@ -156,6 +157,8 @@ export default function Room() {
     e.preventDefault();
     setDropdown(false);
     setSummarise(true);
+    setLoading(true);
+    setSummarisedMessage("Generating Summarising !! Please Wait ...");
     if (checkedMessages.length == 0) return;
     const sortedMessages = checkedMessages.sort((a, b) => a.id - b.id);
     const prompt = `Summarize the following chat conversation based on the specified preferences and instructions.
@@ -188,7 +191,11 @@ export default function Room() {
         let result = "";
         function readChunk() {
           reader.read().then(({ done, value }) => {
-            if (done) return;
+            if (done) {
+              setLoading(false);
+
+              return;
+            }
             const chunk = decoder.decode(value);
             result += chunk;
             setSummarisedMessage((prev) => prev + chunk);

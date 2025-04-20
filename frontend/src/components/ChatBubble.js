@@ -20,6 +20,7 @@ export default function ChatBubble(props) {
   const [selected, setSelected] = useState(false);
   const isMobile = useIsMobile();
   const popupRef = useRef();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -90,6 +91,8 @@ export default function ChatBubble(props) {
     Message : '${username} -> ${message}'`;
     console.log(prompt);
     setReplyingTo(true);
+    setLoading(true);
+    props.generateReply("Generating your Reply...");
     fetch("http://127.0.0.1:8000/chatapp/api/fetch-reply/", {
       method: "POST",
       headers: {
@@ -103,7 +106,10 @@ export default function ChatBubble(props) {
         let result = "";
         function readChunk() {
           reader.read().then(({ done, value }) => {
-            if (done) return;
+            if (done) {
+              setLoading(false);
+              return;
+            }
             const chunk = decoder.decode(value);
             result += chunk;
             props.generateReply(result);
@@ -174,7 +180,7 @@ export default function ChatBubble(props) {
           } flex flex-col p-3 rounded-r-lg w-full rounded-bl-lg`}
         >
           {props.replyArea && (
-            <div className="bg-blue-950 relative rounded-md max-w-[300px] md:max-w-[500px] p-2 pr-4 flex justify-between mb-2">
+            <div className="bg-blue-950 relative rounded-md max-w-[300px] md:max-w-[450px] p-2 pr-4 flex justify-between mb-2">
               <div className="max-h-32 overflow-hidden ">
                 <h2 className="text-cyan-400 mb-2 font-semibold">
                   {props.replyArea?.user?.username}
