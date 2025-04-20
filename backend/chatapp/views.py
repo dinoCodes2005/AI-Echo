@@ -26,11 +26,11 @@ from rest_framework import status
 # Create your views here.
 
 class ChatRoomViewSet(viewsets.ModelViewSet):
-    queryset = ChatRoom.objects.all()
+    queryset = ChatRoom.objects.all().prefetch_related('owners')
     serializer_class = ChatRoomSerializer
     
 class ChatMessageViewSet(viewsets.ModelViewSet):
-    queryset = ChatMessage.objects.all().select_related("user")
+    queryset = ChatMessage.objects.all().select_related("user","user__profile")
     serializer_class = ChatMessageSerializer
     
     def get_queryset(self):

@@ -26,8 +26,8 @@ import { IconMoodSad } from "@tabler/icons-react";
 
 export default function Room() {
   const location = useLocation();
-  const { slug } = useParams();
   const { room } = location.state || {};
+  const { slug } = useParams();
   const [isExpanded, toggle] = useReducer((isExpanded) => !isExpanded, false);
   const [profile, setProfile] = useState(false);
   const [items, setItems] = useState([]);
@@ -62,7 +62,6 @@ export default function Room() {
   useEffect(() => {
     const fetchData = async () => {
       const userData = await fetchUser();
-      console.log(userData.profile);
       setUser(userData.profile);
     };
     fetchData();
@@ -116,7 +115,12 @@ export default function Room() {
 
   const handleFormSubmit = async () => {
     if (message.trim() !== "") {
-      sendJsonMessage({ message: message, username: username, room: slug });
+      sendJsonMessage({
+        message: message,
+        username: username,
+        room: slug,
+        profile: user,
+      });
       setMessage("");
     }
   };
@@ -146,13 +150,22 @@ export default function Room() {
     setSummarise(true);
     if (checkedMessages.length == 0) return;
     const sortedMessages = checkedMessages.sort((a, b) => a.id - b.id);
-    const prompt = `You are given a list of chat messages between users.
-    Summarize the conversation in plain text, with no formatting, symbols, or extra characters.
-     Focus only on what was discussed. Messages:
+    const prompt = `Summarize the following chat conversation based on the specified preferences and instructions.
+    Respond primarily in ${
+      user?.preferred_language
+    } but feel free to weave in English words or phrases naturally, just like the original message.
+    Response Length : ${user?.ai_response_length},
+    Response Format :  ${user?.preferred_response_format},
+    (Information about the user providing the summary):
+    Name: ${username}
+
+    (Instruction: Summarize the conversation in plain text only. No formatting, no markdown, no symbols like , #, or quotes. Focus only on the discussed topics and information exchanged between users.)
+
+    Messages:
     ${sortedMessages
       .map((msg) => `${msg.username.trim()}: ${msg.message.trim()}`)
-      .join("\n")}
-    My name is ${username}.`;
+      .join("\n")}`;
+    console.log(prompt);
     fetch("http://127.0.0.1:8000/chatapp/api/fetch-reply/", {
       method: "POST",
       headers: {
@@ -214,6 +227,10 @@ export default function Room() {
               />
               <h2 className="text-white text-xl font-bold mb-2">
                 {room?.name}
+              </h2>
+              <h2 className="text-white text-md font-normal mb-2">
+                Room owned by :
+                {room?.owners.map((owner) => owner?.username).join(", ")}
               </h2>
               <p className="text-gray-400">Click outside to close</p>
             </div>
@@ -377,6 +394,7 @@ export default function Room() {
                         item.sender ||
                         "Unknown"
                       }
+                      message_object={item}
                       currentUser={username}
                       message={item.message_content}
                       date={formatDate(item.date)}

@@ -48,16 +48,19 @@ export default function ChatBubble(props) {
   };
 
   const replyWithGemini = async () => {
-    const prompt = `Give me an appropriate reply for this message.
+    const prompt = `Give me a single, appropriate reply for this message, naturally blending ${props.profile.preferred_language} and English, mirroring the sender's style of language mixing. Prioritize responding in ${props.profile.preferred_language} while seamlessly incorporating English words and phrases where natural and relevant to the conversation. Avoid generating separate sentences or thoughts in different languages.
     (Information about the sender and preference :
-     Name: ${props.username},
-     Age: ${props.profile.age},
-     AI Response Length : ${props.profile.ai_response_length},
-     AI Tone : ${props.profile.ai_tone},
-     Preferred Domains : ${props.profile.preferred_domains},
-     Preferred Response Format : ${props.profile.preferred_response_format})
+    Name: ${props.username},
+    Age: ${props.profile.age},
+    AI Response Length : ${props.profile.ai_response_length},
+    AI Tone : ${props.profile.ai_tone},
+    Preferred Domains : ${props.profile.preferred_domains},
+    Preferred Response Format : ${props.profile.preferred_response_format}).
+
     (Instruction: Respond in plain text only. No formatting, no markdown, no symbols like , #, or quotes. Only the message):
-     Message : '${username} -> ${message}'`;
+
+    Message : '${username} -> ${message}'`;
+    console.log(prompt);
     fetch("http://127.0.0.1:8000/chatapp/api/fetch-reply/", {
       method: "POST",
       headers: {
@@ -114,7 +117,10 @@ export default function ChatBubble(props) {
         setPop(false);
       }}
     >
-      <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300"></div>
+      <img
+        className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300 object-cover"
+        src={props.message_object?.user?.profile?.profileImage}
+      ></img>
       {props.username === props.currentUser && (
         <div
           className={`absolute bottom-[50%] origin-bottom-right transition-all z-100 duration-200 rounded bg-gray-950 left-1/3 p-2 ${

@@ -38,7 +38,10 @@ export default function ChatRooms() {
   useEffect(() => {
     fetch(fetch_rooms_url)
       .then((response) => response.json())
-      .then((data) => setRooms(data))
+      .then((data) => {
+        setRooms(data);
+        console.log(data);
+      })
       .catch((error) => console.error("Error fetching data", { error }));
   }, []);
   const searchedRoom = rooms.filter((room) =>
@@ -210,6 +213,7 @@ export default function ChatRooms() {
                   name={room.name}
                   message={room.name}
                   image={room.image}
+                  slug={room.slug}
                 />
               </Link>
             ))

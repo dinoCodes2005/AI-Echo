@@ -3,15 +3,17 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import ChatRooms from "./ChatRooms";
 import useIsMobile from "./UseIsMobile";
 import fetchUser from "../api/fetch-user";
-import { IconCashBanknoteEdit } from "@tabler/icons-react";
+import { IconCashBanknoteEdit, IconChevronDown } from "@tabler/icons-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Navbar from "./Navbar";
 
 export default function Profile() {
   const isMobile = useIsMobile();
   const [user, setUser] = useState({});
   const [saved, setSaved] = useState(false);
   const navigate = useNavigate();
+  const [navbar, setNavbar] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,6 +38,10 @@ export default function Profile() {
     ],
     preferred_response_format:
       user?.profile?.preferred_response_format || "paragraph",
+    preferred_language: user?.profile?.preferred_language || [
+      "english",
+      "hindi",
+    ],
   });
 
   useEffect(() => {
@@ -53,6 +59,10 @@ export default function Profile() {
       ],
       preferred_response_format:
         user?.profile?.preferred_response_format || "paragraph",
+      preferred_language: user?.profile?.preferred_language || [
+        "english",
+        "hindi",
+      ],
     });
   }, [user]);
 
@@ -78,6 +88,23 @@ export default function Profile() {
         return {
           ...prev,
           preferred_domains: [...domains, domain],
+        };
+      }
+    });
+  };
+
+  const handleLanguageChange = (language) => {
+    setProfile((prev) => {
+      const languages = [...prev.preferred_language];
+      if (languages.includes(language)) {
+        return {
+          ...prev,
+          preferred_language: languages.filter((d) => d !== language),
+        };
+      } else {
+        return {
+          ...prev,
+          preferred_language: [...languages, language],
         };
       }
     });
@@ -111,6 +138,10 @@ export default function Profile() {
       formData.append(
         "preferred_domains",
         JSON.stringify(profile.preferred_domains)
+      );
+      formData.append(
+        "preferred_language",
+        JSON.stringify(profile.preferred_language)
       );
 
       // handle image upload
@@ -148,6 +179,22 @@ export default function Profile() {
     "education",
     "entertainment",
   ];
+
+  const languages = [
+    "Hindi",
+    "Bengali",
+    "Tamil",
+    "Telugu",
+    "Marathi",
+    "Gujarati",
+    "Kannada",
+    "Malayalam",
+    "Punjabi",
+    "Odia",
+    "Urdu",
+    "Assamese",
+  ];
+
   return (
     <div className="h-full flex ">
       <PanelGroup direction="horizontal">
@@ -160,11 +207,33 @@ export default function Profile() {
           <PanelResizeHandle className="w-1 bg-gray-800 hover:bg-blue-600 transition-colors" />
         )}
         <Panel>
+          {isMobile && <Navbar navbar={navbar} />}
+
           <div
-            className="h-screen flex flex-col bg-repeat overflow-y-auto"
+            className="h-screen flex flex-col bg-repeat overflow-y-auto px-4"
             style={{ backgroundImage: "url('/images/background.jpg')" }}
           >
             <div className="max-w-4xl mx-auto w-full p-6 bg-slate-900/90 backdrop-blur-sm rounded-lg shadow-xl my-8">
+              {isMobile && (
+                <div
+                  onClick={() => {
+                    setNavbar(!navbar);
+                  }}
+                  className="self-end mr-2 z-100 transparent right-0 absolute top-0"
+                >
+                  <button
+                    className={`mr-2 mt-2 origin-left duration-100 transition-all bg-slate-900 rounded p-1`}
+                  >
+                    <IconChevronDown
+                      stroke={2}
+                      size={20}
+                      className={`text-gray-400 hover:text-white ${
+                        navbar && "rotate-180"
+                      }`}
+                    />
+                  </button>
+                </div>
+              )}
               <h1 className="text-3xl font-bold text-cyan-100 mb-6">
                 Profile Settings
               </h1>
@@ -351,6 +420,29 @@ export default function Profile() {
                           }`}
                         >
                           {domain.charAt(0).toUpperCase() + domain.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* preferred language of conversation */}
+                  <div className="mb-6">
+                    <label className="block text-blue-200 font-medium mb-2">
+                      Preferred Language
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {languages.map((language) => (
+                        <button
+                          key={language}
+                          type="button"
+                          onClick={() => handleLanguageChange(language)}
+                          className={`py-1.5 px-3 rounded-full text-sm transition ${
+                            profile?.preferred_language.includes(language)
+                              ? "bg-blue-200 text-slate-900 font-medium"
+                              : "bg-slate-950 text-cyan-100 hover:bg-slate-800"
+                          }`}
+                        >
+                          {language.charAt(0).toUpperCase() + language.slice(1)}
                         </button>
                       ))}
                     </div>

@@ -39,5 +39,8 @@ class Profile(models.Model):
         ],
         default='paragraph'
     )
+    preferred_language = models.JSONField(
+        default = ['english','hindi']
+    )
     def __str__(self):
         return self.user.username

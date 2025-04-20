@@ -57,6 +57,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         else:
             message = data['message'] 
             room = data['room']
+            profile = data['profile']
             await self.save_message(username,room,message)
             await self.channel_layer.group_send(
                 self.room_group_name,{
@@ -64,6 +65,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'message':message,
                     'username':username,
                     'room':room,
+                    'profile':profile,
                 }
             )
         
@@ -72,12 +74,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = event['message']
         username = event['username']
         room = event['room']
+        profile = event['profile']
         
         await self.send(text_data=json.dumps(
             {
                 'message':message,
                 'username':username,
                 'room':room,
+                'profile':profile,
             }
         ))
        
