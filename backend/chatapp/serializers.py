@@ -20,6 +20,12 @@ class ChatRoomSerializer(serializers.ModelSerializer):
         
 class ChatMessageSerializer(serializers.ModelSerializer):
     user = CustomUserSerializer()
+    reply = serializers.SerializerMethodField()
     class Meta:
         model = ChatMessage
         fields = '__all__'
+    
+    def get_reply(self, obj):
+        if obj.reply:
+            return ChatMessageSerializer(obj.reply).data
+        return None

@@ -11,6 +11,7 @@ import useIsMobile from "./components/UseIsMobile.js";
 import Navbar from "./components/Navbar.js";
 import Profile from "./components/Profile.js";
 import Settings from "./components/Settings.js";
+import About from "./components/About.js";
 
 function App() {
   const isMobile = useIsMobile();
@@ -27,6 +28,7 @@ function App() {
               <Route path="/default/" element={<DefaultRoom />} />
               <Route path="/room/:slug" element={<Room />} />
               <Route path="/create-room/" element={<CreateRoom />} />
+              <Route path="/about/" element={<About />}></Route>
             </Route>
           </Routes>
         </>

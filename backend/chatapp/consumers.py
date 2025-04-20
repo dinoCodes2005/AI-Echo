@@ -58,7 +58,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             message = data['message'] 
             room = data['room']
             profile = data['profile']
-            await self.save_message(username,room,message)
+            reply = data['reply']
+            await self.save_message(username,room,message,reply)
             await self.channel_layer.group_send(
                 self.room_group_name,{
                     'type':'chat_message',
@@ -66,6 +67,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'username':username,
                     'room':room,
                     'profile':profile,
+                    'reply':reply,
                 }
             )
         
@@ -75,6 +77,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         username = event['username']
         room = event['room']
         profile = event['profile']
+        reply = event['reply']
         
         await self.send(text_data=json.dumps(
             {
@@ -82,14 +85,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'username':username,
                 'room':room,
                 'profile':profile,
+                'reply':reply
             }
         ))
        
     @database_sync_to_async
-    def save_message(self,username,room,message):
+    def save_message(self,username,room,message,reply):
         user = CustomUser.objects.get(username = username)
         room = ChatRoom.objects.get(slug=room)
-        message = ChatMessage.objects.create(user = user, room = room , message_content = message)
+        reply_msg = None
+        if reply and "messageId" in reply:
+            reply_msg = ChatMessage.objects.get(id=reply["messageId"])
+        message = ChatMessage.objects.create(user = user, room = room , message_content = message, reply=reply_msg)
         return message
     
     @database_sync_to_async

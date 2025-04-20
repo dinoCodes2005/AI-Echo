@@ -253,7 +253,7 @@ export default function ChatRooms() {
                   hover ? "left-24 rotate-0" : "left-0 rotate-180"
                 }`}
               >
-                <Link>
+                <Link to={"/about/"}>
                   <IconHelp
                     stroke={2}
                     size={30}

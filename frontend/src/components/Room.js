@@ -3,6 +3,7 @@ import {
   IconBrandTelegram,
   IconChevronDown,
   IconSearch,
+  IconSquareRoundedX,
   IconTrash,
 } from "@tabler/icons-react";
 import GeminiSVG from "./GeminiSVG.js";
@@ -45,6 +46,7 @@ export default function Room() {
     "No Messages Selected. Select Message using the ✔️ button beside the message to summarise them."
   );
   const [navbar, setNavbar] = useState(false);
+  const [reply, setReply] = useState({});
 
   const isMobile = useIsMobile();
 
@@ -57,6 +59,10 @@ export default function Room() {
       shouldReconnect: (closeEvent) => true, // auto-reconnect
     }
   );
+
+  useEffect(() => {
+    console.log(reply);
+  }, [reply]);
 
   const [user, setUser] = useState();
   useEffect(() => {
@@ -100,6 +106,7 @@ export default function Room() {
           }
         );
         setMessages(response.data);
+        console.log(response.data);
       } catch (error) {
         console.log("Error:", error);
         setMessages([]);
@@ -120,6 +127,7 @@ export default function Room() {
         username: username,
         room: slug,
         profile: user,
+        reply: reply,
       });
       setMessage("");
     }
@@ -194,6 +202,21 @@ export default function Room() {
       });
   };
 
+  const popupRef = useRef();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        setProfile(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="h-screen flex overflow-hidden">
       <PanelGroup direction="horizontal">
@@ -216,9 +239,12 @@ export default function Room() {
           >
             {/* Profile popup */}
             <div
-              className={`absolute top-16 z-10 h-[600px] bg-slate-950 w-[350px] rounded-lg flex flex-col justify-start items-center p-6 ${
+              ref={popupRef}
+              className={`absolute top-16 z-10 h-[400px] bg-slate-950 w-[350px] rounded-lg flex flex-col justify-start items-center p-6 ${
                 profile ? "scale-1" : "scale-0"
               } origin-top-left transition-all duration-200`}
+              tabIndex={0}
+              onBlur={() => setProfile(false)}
             >
               <img
                 src={room?.image || "/placeholder.svg"}
@@ -262,7 +288,7 @@ export default function Room() {
               </div>
 
               <div className="flex mr-5 items-center">
-                <button
+                {/* <button
                   className="self-start m-2 hover:bg-red-600 rounded-md p-2 flex justify-center"
                   onClick={() => {
                     setCheckedMessages([]);
@@ -280,7 +306,7 @@ export default function Room() {
                   >
                     Delete
                   </h2>
-                </button>
+                </button> */}
                 <button
                   className="self-start m-2 hover:bg-red-600 rounded-md p-2 flex justify-center"
                   onClick={() => {
@@ -300,7 +326,7 @@ export default function Room() {
                     Deselect
                   </h2>
                 </button>
-                <div className="relative">
+                <div className={`relative `}>
                   <button
                     onClick={() => {
                       setDropdown(!dropdown);
@@ -333,13 +359,13 @@ export default function Room() {
                   />
                 </div>
 
-                <div className="hidden sm:flex">
+                <div className="flex">
                   <input
                     type="text"
                     className={`mr-2 rounded-lg bg-sky-950 focus:bg-blue-950 text-white placeholder-gray-400 
                         focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 
-                        ${isExpanded ? "w-56" : "w-0"} ${
-                      isExpanded ? "p-2" : "p-0"
+                        ${isExpanded && !isMobile ? "w-56" : "w-0"} ${
+                      isExpanded && !isMobile ? "p-2" : "p-0"
                     }`}
                     placeholder="Search Chats..."
                     onKeyUp={handleSearch}
@@ -352,15 +378,25 @@ export default function Room() {
                     onClick={toggle}
                   />
                 </div>
-
-                <IconDotsVertical
-                  stroke={2}
-                  size={42}
-                  className="inline-block sm:hidden text-gray-400 hover:text-white p-2 hover:bg-blue-700/30 rounded-md cursor-pointer"
-                />
               </div>
             </div>
             {isMobile && <Navbar navbar={navbar} />}
+            {isMobile && isExpanded && (
+              <>
+                <div className="flex">
+                  <input
+                    type="text"
+                    className={`mr-2 rounded-lg bg-slate-950 focus:bg-blue-950 text-white placeholder-gray-400 
+                        focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 
+                        ${isExpanded ? "w-full mt-1 z-[9999] ml-1" : "w-0"} ${
+                      isExpanded ? "p-2" : "p-0"
+                    }`}
+                    placeholder="Search Chats..."
+                    onKeyUp={handleSearch}
+                  />
+                </div>
+              </>
+            )}
 
             {/* Messages container */}
             <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
@@ -369,7 +405,7 @@ export default function Room() {
                   onClick={() => {
                     setNavbar(!navbar);
                   }}
-                  className="self-end mr-2 z-100 transparent right-0 fixed"
+                  className="self-end mr-2 z-[100] transparent right-0 fixed "
                 >
                   <button
                     className={`mr-2 mt-2 origin-left duration-100 transition-all bg-slate-900 rounded p-1  `}
@@ -409,6 +445,9 @@ export default function Room() {
                       deselect={deselect}
                       setDeselect={setDeselect}
                       profile={user}
+                      reply={reply}
+                      setReply={setReply}
+                      replyArea={item.reply}
                     />
                   ))
                 ) : (
@@ -432,39 +471,67 @@ export default function Room() {
 
             {/* Input area */}
 
-            <div className="flex w-full p-4 bg-gray-900 relative items-end mt-2">
-              <button
-                onClick={() => setEmojiOpen(!emojiOpen)}
-                className="flex items-center justify-center h-full bg-blue-500 mr-4 hover:bg-blue-600 rounded-xl text-white px-4 py-1 flex-shrink-0"
-              >
-                <IconMoodSmileBeam stroke={2} />
-              </button>
+            <div className="flex flex-col w-full p-4 pt-2 bg-gray-900 relative  mt-2">
+              {/* {reply.length !== 0 && <> */}
 
-              {emojiOpen && (
-                <div className="absolute bottom-16 left-0 z-50">
-                  <Picker />
+              {reply?.message && (
+                <div className="bg-blue-950 relative rounded-md p-2 flex justify-between">
+                  <div>
+                    <h2 className="text-cyan-400 mb-2 font-semibold">
+                      {reply.username}
+                    </h2>
+                    <h2 className="text-sm text-cyan-100 font-normal">
+                      {reply.message}
+                    </h2>
+                  </div>
+                  <button
+                    className="absolute right-0 top-0"
+                    onClick={() => setReply("")}
+                  >
+                    <IconSquareRoundedX
+                      stroke={2}
+                      className={`text-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-200 hover:bg-red-600 rounded-md p-1`}
+                      size={30}
+                    />
+                  </button>
                 </div>
               )}
 
-              <input
-                type="text"
-                className="flex w-full p-2 focus:outline-none focus:ring-sky-700 focus:ring-2 mr-2 bg-sky-950 focus:bg-blue-950 text-white rounded-xl h-10"
-                placeholder="Type a message"
-                value={message}
-                onChange={handleChange}
-                onKeyUp={(e) => {
-                  if (e.key === "Enter") {
-                    handleFormSubmit();
-                  }
-                }}
-              />
+              {/* </>} */}
+              <div className="flex items-end mt-2">
+                <button
+                  onClick={() => setEmojiOpen(!emojiOpen)}
+                  className="flex items-center justify-center h-full bg-blue-500 mr-4 hover:bg-blue-600 rounded-xl text-white px-4 py-1 flex-shrink-0"
+                >
+                  <IconMoodSmileBeam stroke={2} />
+                </button>
 
-              <button
-                onClick={handleFormSubmit}
-                className="flex items-center justify-center h-full bg-blue-500 hover:bg-blue-600 rounded-xl text-white px-4 py-1 flex-shrink-0"
-              >
-                <IconBrandTelegram stroke={2} />
-              </button>
+                {emojiOpen && (
+                  <div className="absolute bottom-16 left-0 z-50">
+                    <Picker />
+                  </div>
+                )}
+
+                <input
+                  type="text"
+                  className="flex w-full p-2 focus:outline-none focus:ring-sky-700 focus:ring-2 mr-2 bg-sky-950 focus:bg-blue-950 text-white rounded-xl h-10"
+                  placeholder="Type a message"
+                  value={message}
+                  onChange={handleChange}
+                  onKeyUp={(e) => {
+                    if (e.key === "Enter") {
+                      handleFormSubmit();
+                    }
+                  }}
+                />
+
+                <button
+                  onClick={handleFormSubmit}
+                  className="flex items-center justify-center h-full bg-blue-500 hover:bg-blue-600 rounded-xl text-white px-4 py-1 flex-shrink-0"
+                >
+                  <IconBrandTelegram stroke={2} />
+                </button>
+              </div>
             </div>
           </div>
         </Panel>

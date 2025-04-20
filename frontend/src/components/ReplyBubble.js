@@ -1,16 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-  IconArrowDown,
-  IconSquareRoundedX,
-  IconTrash,
-} from "@tabler/icons-react";
+import React, { useEffect, useState } from "react";
+import { IconArrowDown, IconTrash } from "@tabler/icons-react";
 import { IconCheck } from "@tabler/icons-react";
 import { IconChecks } from "@tabler/icons-react";
 import axios from "axios";
 import fetchUser from "../api/fetch-user";
 import useIsMobile from "./UseIsMobile";
 
-export default function ChatBubble(props) {
+export default function ReplyBubble(props) {
   const [pop, setPop] = useState(false);
   const [reply, setReply] = useState(false);
   const [replyingTo, setReplyingTo] = useState(false);
@@ -19,20 +15,6 @@ export default function ChatBubble(props) {
   const [time, setTime] = useState("");
   const [selected, setSelected] = useState(false);
   const isMobile = useIsMobile();
-  const popupRef = useRef();
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (popupRef.current && !popupRef.current.contains(event.target)) {
-        setReply(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   useEffect(() => {
     setUsername(props.username);
@@ -89,7 +71,6 @@ export default function ChatBubble(props) {
 
     Message : '${username} -> ${message}'`;
     console.log(prompt);
-    setReplyingTo(true);
     fetch("http://127.0.0.1:8000/chatapp/api/fetch-reply/", {
       method: "POST",
       headers: {
@@ -173,18 +154,6 @@ export default function ChatBubble(props) {
               : "bg-slate-900"
           } flex flex-col p-3 rounded-r-lg w-full rounded-bl-lg`}
         >
-          {props.replyArea && (
-            <div className="bg-blue-950 relative rounded-md max-w-[300px] md:max-w-[500px] p-2 pr-4 flex justify-between mb-2">
-              <div className="max-h-32 overflow-hidden ">
-                <h2 className="text-cyan-400 mb-2 font-semibold">
-                  {props.replyArea?.user?.username}
-                </h2>
-                <h2 className="text-sm text-cyan-100 font-normal truncate overflow-ellipsis">
-                  {props.replyArea?.message_content}
-                </h2>
-              </div>
-            </div>
-          )}
           <div className="flex justify-between">
             <p className="text-sm w-auto text-cyan-400 mb-2 font-semibold">
               {username}
@@ -232,7 +201,8 @@ export default function ChatBubble(props) {
       </div>
       {props.currentUser !== props.username && (
         <div
-          className={`bg-slate-900 rounded-lg w-40 p-2 absolute shadow-lg overflow-hidden flex flex-col gap-1 right-0 top-8 z-30 transition-all duration-200 ease-in-out origin-left
+          className={`bg-slate-900 rounded-lg w-40 p-2 shadow-lg overflow-hidden flex flex-col gap-1 right-0 top-8 z-30 transition-all duration-200 ease-in-out origin-left
+            ${isMobile && "absolute "}
     ${
       reply
         ? "opacity-100 translate-x-0 pointer-events-auto"
@@ -240,7 +210,6 @@ export default function ChatBubble(props) {
     }`}
           tabIndex={0}
           onBlur={() => setReply(false)}
-          ref={popupRef}
         >
           <>
             <button

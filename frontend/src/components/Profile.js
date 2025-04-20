@@ -207,7 +207,7 @@ export default function Profile() {
           <PanelResizeHandle className="w-1 bg-gray-800 hover:bg-blue-600 transition-colors" />
         )}
         <Panel>
-          {isMobile && <Navbar navbar={navbar} />}
+          {isMobile && <Navbar user={user} navbar={navbar} />}
 
           <div
             className="h-screen flex flex-col bg-repeat overflow-y-auto px-4"

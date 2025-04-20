@@ -20,6 +20,7 @@ class ChatMessage(models.Model):
     message_content = models.TextField()
     date = models.DateField(auto_now=True)
     time = models.TimeField(auto_now=True)
+    reply = models.ForeignKey('self',null=True,blank=True,on_delete=models.SET_NULL,related_name='replies')
         
     class Meta:
         ordering = ('date',)

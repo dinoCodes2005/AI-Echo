@@ -59,12 +59,14 @@ export default function RoomOverview(props) {
               className="text-blue-300 truncate"
               style={{ fontFamily: "Poppins" }}
             >
-              {latestMessage[latestMessage.length - 1] && (
+              {latestMessage[latestMessage.length - 1] ? (
                 <>
                   ~{latestMessage[latestMessage.length - 1]?.user?.username}:
                   &nbsp;
                   {latestMessage[latestMessage.length - 1]?.message_content}
                 </>
+              ) : (
+                "New Room Created !!"
               )}
             </h2>
             <h2

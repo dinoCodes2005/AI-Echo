@@ -22,7 +22,8 @@ code {
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: #0065ad;
+  background: transparent;
+  border: none;
   border-radius: 5px;
 }
 
