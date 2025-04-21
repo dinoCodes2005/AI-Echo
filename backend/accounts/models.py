@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from phonenumber_field.modelfields import PhoneNumberField
+
 # Create your models here.
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
@@ -11,6 +12,7 @@ class CustomUser(AbstractUser):
     
 class Profile(models.Model):
     user = models.OneToOneField(CustomUser,null=True,on_delete=models.CASCADE)
+    pinned_rooms = models.ManyToManyField('chatapp.ChatRoom',blank=True,related_name="pinned_by")
     profileImage = models.ImageField(upload_to='profile_pics',null=True,blank=True,default="profile_pics/default_profile_pic.jpg")
     bio = models.TextField()
     contact = PhoneNumberField(blank=True, null=True)

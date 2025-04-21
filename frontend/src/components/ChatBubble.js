@@ -21,6 +21,7 @@ export default function ChatBubble(props) {
   const isMobile = useIsMobile();
   const popupRef = useRef();
   const [loading, setLoading] = useState(false);
+  const [translatedMessage, setTranslatedMessage] = useState("");
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -74,6 +75,24 @@ export default function ChatBubble(props) {
       messageId: props.messageId,
       username: username,
     });
+  };
+
+  const translate = async () => {
+    try {
+      const prompt = `Translate the following message to ${props.profile?.preferred_language[0]} or ${props.profile?.preferred_language[1]} (whichever is better). 
+      Only return the translated message — no explanations, no prefaces, no extra text.
+      Remove any markdown formatting like **, ##, or similar symbols.
+      Message: ${message}`;
+
+      const response = axios.post(
+        "http://127.0.0.1:8000/chatapp/api/translate/",
+        { prompt }
+      );
+      const data = (await response).data;
+      setTranslatedMessage(data.message);
+    } catch (error) {
+      console.log("Error tranlsating :", error);
+    }
   };
 
   const replyWithGemini = async () => {
@@ -142,7 +161,7 @@ export default function ChatBubble(props) {
   return (
     <div
       id={props.messageId}
-      className={`flex relative m-4 space-x-3 max-w-[600px] px-0 sm:px-5 ${
+      className={`flex items-start relative m-4 space-x-3 max-w-[800px] px-0 sm:px-5 ${
         props.currentUser !== props.username ? "" : "self-end  mb-4"
       }`}
       onMouseEnter={() => {
@@ -158,7 +177,7 @@ export default function ChatBubble(props) {
       ></img>
       {props.username === props.currentUser && (
         <div
-          className={`absolute bottom-[50%] origin-bottom-right transition-all z-[100] duration-200 rounded bg-gray-950 left-1/3 p-2 ${
+          className={`absolute right-0 bottom-[50%] w-[200px] origin-bottom-right transition-all z-[100] duration-200 rounded bg-gray-950 p-2 ${
             reply ? "scale-1" : "scale-0"
           }`}
         >
@@ -171,7 +190,7 @@ export default function ChatBubble(props) {
           </button>
         </div>
       )}
-      <div className="flex items-center  ">
+      <div className="flex items-center max-w-[500px]  ">
         <div
           className={`${
             props.currentUser === props.username
@@ -204,8 +223,13 @@ export default function ChatBubble(props) {
               />
             )}
           </div>
+          {translatedMessage.length > 0 && (
+            <p className="text-sm text-white italic">Translated</p>
+          )}
 
-          <p className="text-sm text-cyan-100">{message} </p>
+          <p className="text-sm text-cyan-100">
+            {translatedMessage.length > 0 ? translatedMessage : message}
+          </p>
           <span className="text-xs  text-cyan-100/70 leading-none mt-2 ">
             {time}
           </span>
@@ -238,7 +262,9 @@ export default function ChatBubble(props) {
       </div>
       {props.currentUser !== props.username && (
         <div
-          className={`bg-slate-900 rounded-lg w-40 p-2 absolute shadow-lg overflow-hidden flex flex-col gap-1 right-0 top-8 z-30 transition-all duration-200 ease-in-out origin-left
+          className={`bg-slate-900 rounded-lg w-40 p-2 shadow-lg overflow-hidden flex flex-col gap-1 right-0 top-8 z-30 transition-all duration-200 ease-in-out origin-left
+
+            ${isMobile && "absolute"}
     ${
       reply
         ? "opacity-100 translate-x-0 pointer-events-auto"
@@ -263,9 +289,9 @@ export default function ChatBubble(props) {
             </button>
             <button
               className="w-full text-left px-3 py-2 hover:bg-slate-800 rounded transition-colors text-cyan-200"
-              onClick={replyWithGemini}
+              onClick={translate}
             >
-              Summarise
+              Translate
             </button>
           </>
         </div>

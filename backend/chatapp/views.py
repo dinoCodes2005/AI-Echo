@@ -10,7 +10,7 @@ from .serializers import ChatMessageSerializer, ChatRoomSerializer
 from rest_framework import viewsets
 from rest_framework.generics import GenericAPIView
 from rest_framework.decorators import api_view
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 import json
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
@@ -126,5 +126,16 @@ def fetch_reply(request):
 
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+@csrf_exempt
+def translate(request):
+    data = json.loads(request.body)
+    prompt = data["prompt"]
+    model = genai.GenerativeModel("gemini-2.0-flash")
+    response = model.generate_content(prompt)
+    return JsonResponse({
+        "success":True,
+        "message":response.text.strip()
+    })
     
     

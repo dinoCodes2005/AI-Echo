@@ -1,11 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import User
-
-from accounts.models import CustomUser
 
 # Create your models here.
 class ChatRoom(models.Model):
-    owners = models.ManyToManyField(CustomUser, related_name='owned_rooms', blank=True)
+    owners = models.ManyToManyField('accounts.CustomUser', related_name='owned_rooms', blank=True)
     name = models.CharField(max_length = 100)
     slug = models.SlugField(unique=True)
     image = models.ImageField(upload_to='room_images/', null=True, blank=True,default="profile_pics/default_profile_pic.jpg")
@@ -15,7 +12,7 @@ class ChatRoom(models.Model):
     
     
 class ChatMessage(models.Model):
-    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    user = models.ForeignKey('accounts.CustomUser',on_delete=models.CASCADE)
     room = models.ForeignKey(ChatRoom,on_delete=models.CASCADE)
     message_content = models.TextField()
     date = models.DateField(auto_now=True)

@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import slugify from "slugify";
+import { IconPin } from "@tabler/icons-react";
+import { IconPinFilled } from "@tabler/icons-react";
 
 export default function RoomOverview(props) {
   const [latestMessage, setLatestMessage] = useState("");
@@ -43,6 +45,7 @@ export default function RoomOverview(props) {
       className={`transition-all duration-200 ease-in-out  hover:bg-blue-900 h-20 rounded-lg my-2 flex justify-between px-2 items-center cursor-pointer ${
         slugify(props.name.toLowerCase()) === slug ? "bg-blue-900" : ""
       }`}
+      onmouse
     >
       <div className="flex w-full ">
         <img
@@ -51,9 +54,18 @@ export default function RoomOverview(props) {
           alt=""
         />
         <div className="flex flex-col overflow-hidden w-full">
-          <h2 className="text-white truncate" style={{ fontFamily: "Poppins" }}>
-            {props.name}
-          </h2>
+          <div className="flex justify-between">
+            <h2
+              className="text-white truncate"
+              style={{ fontFamily: "Poppins" }}
+            >
+              {props.name}
+            </h2>
+
+            {/* <IconPin onClick={} stroke={1} className="text-white" />
+            <IconPinFilled stroke={1} className="text-white" /> */}
+          </div>
+
           <div className="flex justify-between">
             <h2
               className="text-blue-300 truncate"

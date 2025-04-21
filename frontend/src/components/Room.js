@@ -32,7 +32,6 @@ export default function Room() {
   const [isExpanded, toggle] = useReducer((isExpanded) => !isExpanded, false);
   const [profile, setProfile] = useState(false);
   const [items, setItems] = useState([]);
-  const [typedMessages, setTypedMessages] = useState([]);
   const [dropdown, setDropdown] = useState(false);
   const [summarise, setSummarise] = useState(false);
   const messagesEndRef = useRef(null);
@@ -193,7 +192,6 @@ export default function Room() {
           reader.read().then(({ done, value }) => {
             if (done) {
               setLoading(false);
-
               return;
             }
             const chunk = decoder.decode(value);
@@ -223,6 +221,10 @@ export default function Room() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const handleEmojiClick = (emoji) => {
+    setMessage((prev) => prev + emoji.emoji);
+  };
 
   return (
     <div className="h-screen flex overflow-hidden">
@@ -515,7 +517,7 @@ export default function Room() {
 
                 {emojiOpen && (
                   <div className="absolute bottom-16 left-0 z-50">
-                    <Picker />
+                    <Picker onEmojiClick={handleEmojiClick} />
                   </div>
                 )}
 

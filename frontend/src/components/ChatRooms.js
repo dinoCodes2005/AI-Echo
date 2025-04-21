@@ -15,9 +15,12 @@ import { IconSettings } from "@tabler/icons-react";
 import { IconHelp } from "@tabler/icons-react";
 import fetchUser from "../api/fetch-user.js";
 import { jwtDecode } from "jwt-decode";
+import useCheckAuthentication from "../api/check-auth.js";
 
 export default function ChatRooms() {
   const fetch_rooms_url = "http://127.0.0.1:8000/chatapp/chat-rooms/";
+  const { username, isLoggedIn } = useCheckAuthentication();
+
   const navigate = useNavigate();
   //set rooms is for fetching the room objects
   const [rooms, setRooms] = useState([]);
