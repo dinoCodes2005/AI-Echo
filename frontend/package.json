@@ -1,6 +1,7 @@
 {
   "name": "my-app",
   "version": "0.1.0",
+  "homepage": "http://localhost:3000/default",
   "private": true,
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.0",
